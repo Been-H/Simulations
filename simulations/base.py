@@ -41,7 +41,6 @@ class Simulation:
         organisms_to_append = []
         for organism in self.organisms:
             offspring = organism.reproduce(gene_to_mutate=gene_to_mutate)
-            print(offspring)
             organisms_to_append.extend(offspring)
         self.organisms.extend(organisms_to_append)
 
