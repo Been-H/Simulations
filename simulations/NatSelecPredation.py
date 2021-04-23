@@ -1,37 +1,39 @@
 class NatSelectPredationSim(Simulation):
 
     def __init__(self, num_generations, max_organisms, hunting_rate):
-        super().__init__(num_generations, max_organisms)
+        super().__init__(num_generations)
+        self.max_organisms = max_organisms
         self.hunting_rate = hunting_rate
         self.average_speeds = []
 
     def handle_predation(self):
-        for organism in self.organisms[:]:
+        survived = []
+        for organism in self.organisms:
             speed = organism.get_trait("Speed")
             if r.random() < self.hunting_rate:
                 if speed.value <= 2:
-                    self.organisms.remove(organism)
+                    continue
                 elif speed.value < 5:
                     if r.random() < .5:
-                        self.organisms.remove(organism)
+                        continue
+                    survived.append(organism)
                 elif speed.value < 6:
                     if r.random() < .4:
-                        self.organisms.remove(organism)
+                        continue
+                    survived.append(organism)
                 else:
                     if r.random() < .3:
-                        self.organisms.remove(organism)
+                        continue
+                    survived.append(organism)
+            else:
+                survived.append(organism)
+        self.organisms = survived
+
 
     def handle_reproduction(self):
         if len(self.organisms) * 2 >= self.max_organisms:
             return
-        organisms_to_append = []
-        for organism in self.organisms:
-            new_organism = deepcopy(organism)
-            speed = new_organism.get_trait("Speed")
-            if r.random() < speed.mutation_occurence_rate:
-                speed.mutate()
-            organisms_to_append.append(new_organism)
-        self.organisms.extend(organisms_to_append)
+        super().handle_reproduction("Speed")
 
     def calculate_stats_per_generation(self):
         super().calculate_stats_per_generation()
@@ -47,12 +49,12 @@ class NatSelectPredationSim(Simulation):
     def plot_results(self):
         fig, (plt1, plt2) = plt.subplots(2, 1)
         fig.suptitle('Data From Simulation', fontsize=20)
-        plt1.plot([i for i in range(self.generations_completed)], self.average_speeds)
+        plt1.plot(self.generation_marks, self.average_speeds)
         plt1.set_xlabel('Reproductive Generation', fontsize=14)
         plt1.set_ylabel('Average Value of Speed Gene', fontsize=14)
         plt1.set_xticks(scipy.arange(0, self.num_generations, 50))
         plt1.set_yticks(scipy.arange(0, 14, 1))
-        plt2.plot([i for i in range(self.generations_completed)], self.num_organisms)
+        plt2.plot(self.generation_marks, self.num_organisms)
         plt2.set_xlabel('Reproductive Generation', fontsize=14)
         plt2.set_ylabel('Number of Bunnies', fontsize=14)
         plt2.set_xticks(scipy.arange(0, self.num_generations, 100))
